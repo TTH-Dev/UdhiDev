@@ -3,9 +3,7 @@ import Tabs from "react-bootstrap/Tabs";
 
 import RWardManagement from "./wardReportTabs/RWardManagement";
 import RAdmissionRecords from "./wardReportTabs/RAdmissionRecords";
-import RFeedBack from "./wardReportTabs/RFeedBack";
-import RInjectionReport from "./wardReportTabs/RInjectionReport";
-import RDisposalReport from "./wardReportTabs/RDisposalReport";
+
 
 const WardReport = () => {
   return (
@@ -23,7 +21,7 @@ const WardReport = () => {
           <RAdmissionRecords />
         </Tab>
 
-        <Tab title="Feedback" eventKey="Feedback">
+        {/* <Tab title="Feedback" eventKey="Feedback">
           <RFeedBack />{" "}
         </Tab>
 
@@ -33,7 +31,7 @@ const WardReport = () => {
 
         <Tab title="Disposal Report" eventKey="Disposal Report">
           <RDisposalReport />{" "}
-        </Tab>
+        </Tab> */}
       </Tabs>
     </div>
   );

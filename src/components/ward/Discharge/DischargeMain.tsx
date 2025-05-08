@@ -15,7 +15,7 @@ const DisChargeMain: React.FC = () => {
   const navigate = useNavigate();
 
   const [searchParam] = useSearchParams();
-  const id = searchParam.get("id");
+  const id = searchParam.get("id")||sessionStorage.getItem("patientId");
   const [data, setData] = useState<any>();
   const [times, setTimes] = useState({
     inTime: "",

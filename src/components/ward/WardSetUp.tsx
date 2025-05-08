@@ -3,25 +3,29 @@ import Tabs from "react-bootstrap/Tabs";
 
 import WardDetail from "./WardDetail";
 
-const WardSetUp = () => {
-  const Floors = 2;
 
-  const FloorNo = Array.from({ length: Floors }, (_, i) => i + 1);
+const WardSetUp = () => {
+    
+
   return (
     <>
-      <div className="mx-2 mb-5">
-        <Tabs
-          defaultActiveKey="Floor 1"
-          id="uncontrolled-tab-example"
-          className="ms-2"
-        >
-          {FloorNo.map((val: any) => (
-            <Tab title={`Floor ${val}`} key={val} eventKey={`Floor ${val}`}>
-              <WardDetail />
-            </Tab>
-          ))}
-        </Tabs>
-      </div>
+    <div className="mx-2 mb-5">
+    <Tabs
+        defaultActiveKey="1stfloor"
+        id="uncontrolled-tab-example"
+        className="ms-2"
+      >
+          <Tab title="1stfloor"  eventKey="1stfloor">
+            <WardDetail cfloor="1stfloor" />
+          </Tab>
+          <Tab title="2ndfloor"  eventKey="2ndfloor">
+
+            <WardDetail cfloor="2ndfloor" />
+          </Tab>
+      </Tabs>
+
+    </div>
+      
     </>
   );
 };

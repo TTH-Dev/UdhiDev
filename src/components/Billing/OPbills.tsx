@@ -38,13 +38,13 @@ const OPbills: React.FC = () => {
       return;
     }
     try {
-      const res = await axios.get(`${api_url}/api/billing/filter?UHID=${filervalue.uuhid}&phoneNo=${filervalue.phoeNo}&status=${filervalue.status}&limit=${pageSize}&page=${currentPage}&date=${moment(new Date()).format("YYYY-MM-DD")}`, {
+      const res = await axios.get(`${api_url}/api/billing/filter?UHID=${filervalue?.uuhid}&phoneNo=${filervalue?.phoeNo}&status=${filervalue?.status}&limit=${pageSize}&page=${currentPage}&billFor=opBilling&date=${moment(new Date()).format("YYYY-MM-DD")}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      const datass = res.data.data.patients.map((val: any, index: number) => {
+      const datass = res?.data?.data?.billings.map((val: any, index: number) => {
         return {
           SNo: index + 1,
           key: val._id,
@@ -59,7 +59,7 @@ const OPbills: React.FC = () => {
       })
       setData(datass);
 
-      setTotalPages(res.data.totalPages);
+      setTotalPages(res?.data?.totalPages);
 
     } catch (error: any) {
       console.log(error);

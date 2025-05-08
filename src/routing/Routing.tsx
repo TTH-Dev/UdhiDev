@@ -280,6 +280,7 @@ import PmBedManagement from "../components/InPatient/patientMangementTabs/PmBedM
 import PmPersonalInfo from "../components/InPatient/patientMangementTabs/PmPersonalInfo";
 import IPpmPatientDetailsMain from "../components/InPatient/IPpmPatientDetailsMain";
 import EditNewIp from "../components/InPatient/EditNewIp";
+import AddWard from "../components/ward/AddWard";
 
 const { Content } = Layout;
 
@@ -1217,6 +1218,7 @@ const Routing: React.FC = () => {
 
                   <Route path="ward-setup" element={<WardSetUp />} />
                   <Route path="ward-report" element={<WardReport />} />
+                  <Route path="ward-setup/add-ward" element={<AddWard/>} />
                 </Route>
 
                 <Route path="/ward/ward-management" element={<DisChargeMain />}>

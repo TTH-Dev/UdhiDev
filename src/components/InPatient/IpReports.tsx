@@ -52,8 +52,6 @@ const IpReports = () => {
         }
       );
 
-      console.log(res, "klkl");
-
       setData(res?.data?.data?.patients);
       setTotalPages(res?.data?.totalPages);
       setFilterVaue({

@@ -11,7 +11,7 @@ const OTProductIndentsMain = () => {
       <Tabs
         defaultActiveKey="Product Detail"
         id="uncontrolled-tab-example"
-        className="ms-4"
+        className="ms-0"
       >
         <Tab title="Product Detail" eventKey="Product Detail">
           <PIProductDetail />
@@ -19,11 +19,11 @@ const OTProductIndentsMain = () => {
         </Tab>
 
         <Tab title="Request" eventKey="Request">
-          <PIRequest/>
+          <PIRequest />
         </Tab>
 
         <Tab title="Received" eventKey="Received">
-          <PIReceived/>
+          <PIReceived />
         </Tab>
       </Tabs>
     </div>

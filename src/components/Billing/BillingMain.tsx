@@ -15,7 +15,7 @@ const BillingMain: React.FC = () => {
           >
             OP Bills
           </NavLink>
-          {/* <NavLink
+          <NavLink
             to="/billing/ip-bills"
             className={({ isActive }) =>
               `emr-link ms-3 ${isActive ? "active" : ""}`
@@ -23,14 +23,7 @@ const BillingMain: React.FC = () => {
           >
             IP Bills
           </NavLink>
-          <NavLink
-            to="/billing/due-billing"
-            className={({ isActive }) =>
-              `emr-link ms-3 ${isActive ? "active" : ""}`
-            }
-          >
-            Due Billing
-          </NavLink> */}
+          
         </div>
       </div>
 

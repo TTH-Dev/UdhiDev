@@ -50,6 +50,10 @@ const PatientDetail = () => {
     }
   };
 
+  const handleId=(id:any)=>{
+    sessionStorage.setItem("patientId",id)
+  }
+
   useEffect(() => {
     getData();
   }, [currentPage]);
@@ -95,7 +99,7 @@ const PatientDetail = () => {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <Link to={`doctor-activity?id=${row?.patientId}`}>
+                        <Link to={`doctor-activity?id=${row?.patientId}`} onClick={()=>handleId(row?.patientId)}>
                           <Button className="i-btn me-3">
                             <FaEye />
                           </Button>
