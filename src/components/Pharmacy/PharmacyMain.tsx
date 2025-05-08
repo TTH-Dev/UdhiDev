@@ -15,7 +15,7 @@ const PharmacyMain: React.FC = () => {
           >
             Service Billing
           </NavLink>
-          {/* <NavLink
+          <NavLink
             to="/pharmacy/request-indents"
             className={({ isActive }) =>
               `emr-link ms-3 ${isActive ? "active" : ""}`
@@ -30,7 +30,7 @@ const PharmacyMain: React.FC = () => {
             }
           >
             IP Billing
-          </NavLink> */}
+          </NavLink>
          
         </div>
       </div>

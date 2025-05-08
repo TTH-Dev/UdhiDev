@@ -6,25 +6,30 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { Button, Checkbox, Input } from "antd";
+import { Button, Checkbox, Input, message } from "antd";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { IoMdClose } from "react-icons/io";
+import { api_url } from "../../../Config";
+import axios from "axios";
 
 const PostCare = () => {
   const [data, setData] = useState([
     {
       date: moment().format("DD-MM-YYYY"),
-      time: false,
+      timeValue: false,
       name: "",
-      timeValue: moment().format("HH:mm A"),
+      time: moment().format("HH:mm A"),
     },
   ]);
 
+  const id = sessionStorage.getItem("patientId");
+  const [isUpdate, setisUpdate] = useState(false);
+  const [datas, setDatas] = useState<any>();
+
   const handleTime = (e: any, index: number) => {
     const updated = [...data];
-    updated[index].time = e.target.checked;
-
+    updated[index].timeValue = e.target.checked;
     setData(updated);
   };
 
@@ -40,47 +45,142 @@ const PostCare = () => {
     setData(updated);
   };
 
-  useEffect(() => {
-    const inTime = moment("09:00 AM", "hh:mm A");
-    const now = moment();
+// This useEffect should only run if we are not updating
+useEffect(() => {
+  if (!datas?.bedManagement?.bed?.inTime || isUpdate) return;
 
-    const newEntries: any[] = [];
+  const outTime = moment(datas?.bedManagement?.bed?.outTime, "hh:mm A");
+  const inTime = moment(datas?.bedManagement?.bed?.inTime, "hh:mm A");
+  const now = moment();
+  const newEntries: any[] = [];
 
-    let temp = inTime.clone();
-    while (temp.isSameOrBefore(now, "hour")) {
-      newEntries.push({
-        date: temp.format("DD-MM-YYYY"),
-        time: false,
-        timeValue: temp.format("HH:mm A"),
-        name: "",
+  let temp = inTime.clone();
+  while (temp.isSameOrBefore(now, "hour")) {
+    newEntries.push({
+      date: temp.format("DD-MM-YYYY"),
+      timeValue: false,
+      time: temp.format("hh:mm A"),
+      name: "",
+    });
+    temp.add(1, "hour");
+  }
+
+  setData(newEntries);
+
+  const minutesToNextHour = 60 - now.minutes();
+  const msToNextHour = minutesToNextHour * 60 * 1000;
+
+  const timeout = setTimeout(() => {
+    const interval = setInterval(() => {
+      const currentTime = moment().format("hh:mm A");
+      if (currentTime === outTime.format("hh:mm A")) {
+        clearInterval(interval);
+        return;
+      }
+      setData((prev) => [
+        ...prev,
+        {
+          date: moment().format("DD-MM-YYYY"),
+          timeValue: false,
+          time: currentTime,
+          name: "",
+        },
+      ]);
+    }, 60 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, msToNextHour);
+
+  return () => clearTimeout(timeout);
+}, [datas, isUpdate]);
+
+
+  const getPatient = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        localStorage.clear();
+        message.error("Login Required!");
+        return;
+      }
+      const res = await axios.get(`${api_url}/api/patient/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      temp.add(1, "hour");
-    }
+      setDatas(res?.data?.data?.patient);
+      if (
+        res?.data?.data?.patient?.surgeryDetailsId?.nurseActivity?.postCare
+          ?.length > 0
+      ) {
 
-    setData(newEntries);
+        let df=res?.data?.data?.patient?.surgeryDetailsId?.nurseActivity
+        ?.postCare.map((val:any)=>({
+          date: moment(val?.date).format("DD-MM-YYYY"),
+          time: val?.time,
+          timeValue: val?.name?true:false,
+          name:val?.name
+        }
+        
+        ))
 
-    const minutesToNextHour = 60 - now.minutes();
-    const msToNextHour = minutesToNextHour * 60 * 1000;
+        console.log(df,"df");
+        
 
-    const timeout = setTimeout(() => {
-      const interval = setInterval(() => {
-        const currentTime = moment().format("HH:mm A");
-        setData((prev) => [
-          ...prev,
-          {
-            date: moment().format("DD-MM-YYYY"),
-            time: false,
-            timeValue: currentTime,
-            name: "",
-          },
+
+        setData([
+          ...df,
         ]);
-      }, 60 * 60 * 1000);
+        
+        setisUpdate(true);
+      }
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
 
-      return () => clearInterval(interval);
-    }, msToNextHour);
+  
 
-    return () => clearTimeout(timeout);
-  }, []);
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        localStorage.clear();
+        message.error("Login Required!");
+        return;
+      }
+      let fg = datas?.surgeryDetailsId?._id;
+
+      if (!fg) {
+        message.error("Surgery Id error contact support team!");
+        return;
+      }
+      const filteredData = data.filter((item) => item.time !== null);
+
+      await axios.patch(
+        `${api_url}/api/surgery-details/${fg}`,
+        {
+          nurseActivity: { postCare: filteredData },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      message.success("Saved Successfully!");
+      await getPatient();
+    } catch (error: any) {
+      console.log(error);
+      message.error("Something went wrong!");
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      getPatient();
+    }
+  }, [id]);
 
   return (
     <>
@@ -108,20 +208,20 @@ const PostCare = () => {
           <TableBody>
             {data.map((val, i) => (
               <TableRow key={i}>
-                <TableCell style={{ width: "20%" }}>{val.date}</TableCell>
+                <TableCell style={{ width: "20%" }}>{moment(val?.date).format("DD-MM-YYYY")}</TableCell>
                 <TableCell style={{ width: "20%" }}>
                   <Checkbox
                     className="me-2"
                     style={{ height: 35 }}
-                    checked={val.time}
+                    checked={val?.timeValue}
                     onChange={(e) => handleTime(e, i)}
                   />
-                  <>{val.timeValue}</>
+                  <>{val?.time}</>
                 </TableCell>
                 <TableCell className="d-flex justify-content-between align-items-center">
                   <Input
                     style={{ height: 35 }}
-                    value={val.name}
+                    value={val?.name}
                     onChange={(e) => handleFoodChange(e, i)}
                   />
                   <IoMdClose
@@ -141,7 +241,9 @@ const PostCare = () => {
         style={{ background: "#fff" }}
       >
         <Button className="c-btn me-3">Cancel</Button>
-        <Button className="s-btn">Save</Button>
+        <Button className="s-btn" onClick={handleSave}>
+          {isUpdate ? "Update" : "Save"}
+        </Button>
       </div>
     </>
   );

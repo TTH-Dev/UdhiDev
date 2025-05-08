@@ -12,7 +12,7 @@ const OTReportsMain = () => {
       <Tabs
         defaultActiveKey="Surgery Time"
         id="uncontrolled-tab-example"
-        className="ms-4"
+        className="ms-0"
       >
         <Tab title="Surgery Time" eventKey="Surgery Time">
           <RSurgeryTime/>

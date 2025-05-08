@@ -7,48 +7,83 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
-import { Button } from "antd";
+import { Button, message, Pagination } from "antd";
+import axios from "axios";
 import { MdEdit } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import { api_url } from "../../Config";
+import { useEffect, useState } from "react";
+import dayjs from "dayjs";
 
-const rows = [
-  {
-    sno: 1,
-    opNo: "OP01",
-    patientName: "Raja",
-    operationTime: "10:50 AM",
-    surgeonName: "Dr. Raja",
-    status: "Completed",
-  },
-  {
-    sno: 2,
-    opNo: "OP01",
-    patientName: "Monica",
-    operationTime: "01:30 PM",
-    surgeonName: "Dr. Ram",
-    status: "Pending",
-  },
-  {
-    sno: 3,
-    opNo: "OP01",
-    patientName: "Karthil",
-    operationTime: "02:10 PM",
-    surgeonName: "-",
-    status: "Pending",
-  },
-];
+interface PatientData {
+  key: string;
+  opNo: string;
+  patientName: string;
+  operationTime: string;
+  surgeonName: string;
+  status: string;
+}
 
 const OTSurgeryManagement = () => {
   const navigate = useNavigate();
+  const [data, setData] = useState<PatientData[]>([]);
+  const pageSize = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const fetchData = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        localStorage.clear();
+        message.error("Login required!");
+        return;
+      }
+
+      const res = await axios.get(
+        `${api_url}/api/patient/filter?&limit=${pageSize}&page=${currentPage}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log(res,"res");
+      
+
+      setTotalPages(res.data.totalPages);
+      const datas = res.data.data.patients.map((val: any) => {
+        return {
+          key: val._id,
+          opNo: val.opNo,
+          patientName: val.PatientName,
+          operationTime: val?.surgeryDetailsId?.surgeryDate || "-",
+          status:val?.surgeryDetailsId?.status,
+          surgeonName: val?.surgeryDetailsId?.surgertData?.surgeon
+        
+        };
+      });
+      setData(datas);
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, [currentPage]);
 
   const handleNav = () => {
     navigate("surgery-management-setup");
   };
 
+  console.log(data,"data");
+  
+
   return (
     <div className="emr-complaints-box mx-3 rounded">
       <div>
-        <p className="emr-search-text mb-0 p-4">Patient Details</p>
+        <p className="emr-search-text mb-0 p-3">Patient Details</p>
       </div>
 
       <TableContainer component={Paper} elevation={0}>
@@ -65,27 +100,31 @@ const OTSurgeryManagement = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row, index) => (
+            {data.map((row, index) => (
               <TableRow key={index}>
-                <TableCell>{row.sno}</TableCell>
+                <TableCell>{(currentPage-1)*pageSize+1+index}</TableCell>
                 <TableCell>{row.opNo}</TableCell>
                 <TableCell>{row.patientName}</TableCell>
-                <TableCell>{row.operationTime}</TableCell>
+                <TableCell>
+                  {row.operationTime && dayjs(row.operationTime).isValid()
+                    ? dayjs(row.operationTime).format("hh:mm A")
+                    : "-"}
+                </TableCell>
                 <TableCell>{row.surgeonName}</TableCell>
                 <TableCell>
                   <span
                     style={{
                       color:
-                        row.status.toLowerCase() === "completed"
-                          ? "green"
-                          : "orange",
+                        (row.status || "-").toLowerCase() === "pending"
+                          ? "#FFB617"
+                          : "#00BE4F",
                     }}
                   >
                     {row.status}
                   </span>
                 </TableCell>
                 <TableCell>
-                  <Button className="i-btn" onClick={handleNav}>
+                  <Button className="i-btn" onClick={() => handleNav()}>
                     <MdEdit />
                   </Button>
                 </TableCell>
@@ -94,6 +133,17 @@ const OTSurgeryManagement = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      {data.length > 0 && (
+        <div className="d-flex justify-content-end mt-4 pb-4">
+          <Pagination
+            current={currentPage}
+            total={totalPages * pageSize}
+            pageSize={pageSize}
+            onChange={handlePageChange}
+            showSizeChanger={false}
+          />
+        </div>
+      )}
     </div>
   );
 };
