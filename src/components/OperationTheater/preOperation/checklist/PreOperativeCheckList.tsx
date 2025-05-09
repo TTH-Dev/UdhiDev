@@ -5,12 +5,15 @@ import {
     DatePicker,
     Form,
     Input,
+    message,
     Radio,
     Row,
     TimePicker,
     Upload
 } from "antd";
-import React from "react";
+import { api_url } from "../../../../Config";
+import axios from "axios";
+
 
 const PreOperativeCheckList: React.FC = () => {
   const [form] = Form.useForm();
@@ -22,6 +25,39 @@ const PreOperativeCheckList: React.FC = () => {
     if (Array.isArray(e)) return e;
     return e?.fileList;
   };
+
+  const patientId = sessionStorage.getItem("patientId");
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        localStorage.clear();
+        message.error("Login Required!");
+        return;
+      }
+
+      const formData = new FormData();
+      let gg=form.getFieldsValue()
+      formData.append("patientId", patientId || "-");
+      formData.append("preOperativeChecklistData", JSON.stringify(gg));
+      await axios.post(`${api_url}/api/preOperativeChecklist`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      message.success("Saved Successfully!");
+    } catch (error: any) {
+      console.log(error);
+      message.error("Something went wrong!");
+    }
+  };
+
+
+
+
+
+
 
   return (
     <>
@@ -91,12 +127,12 @@ const PreOperativeCheckList: React.FC = () => {
               <p className="emr-search-text mb-0 py-3 ps-3"> IOP</p>
               <div className="d-flex">
                 <Col span={12}>
-                  <Form.Item name="od" label="OD" className="emr-label">
+                  <Form.Item name="iOPod" label="OD" className="emr-label">
                     <Input style={{ height: "40px" }} />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item name="os" label="OS" className="emr-label">
+                  <Form.Item name="ioPsos" label="OS" className="emr-label">
                     <Input style={{ height: "40px" }} />
                   </Form.Item>
                 </Col>
@@ -112,12 +148,12 @@ const PreOperativeCheckList: React.FC = () => {
               <p className="emr-search-text mb-0 py-3 ps-3"> NLD</p>
               <div className="d-flex">
                 <Col span={12}>
-                  <Form.Item name="od" label="OD" className="emr-label">
+                  <Form.Item name="nLDod" label="OD" className="emr-label">
                     <Input style={{ height: "40px" }} />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item name="os" label="OS" className="emr-label">
+                  <Form.Item name="nLDos" label="OS" className="emr-label">
                     <Input style={{ height: "40px" }} />
                   </Form.Item>
                 </Col>
@@ -137,12 +173,12 @@ const PreOperativeCheckList: React.FC = () => {
               <p className="emr-search-text mb-0 py-3 ps-3"> Drug Allergy</p>
               <div className="d-flex">
                 <Col span={12}>
-                  <Form.Item name="yes" label="Yes" className="emr-label">
+                  <Form.Item name="dilationYes" label="Yes" className="emr-label">
                     <Input style={{ height: "40px" }} />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item name="no" label="No" className="emr-label">
+                  <Form.Item name="dilationNo" label="No" className="emr-label">
                     <Input style={{ height: "40px" }} />
                   </Form.Item>
                 </Col>
@@ -185,7 +221,7 @@ const PreOperativeCheckList: React.FC = () => {
             </Col>
             <Col span={12} style={{marginTop:"-70px"}}>
               <Form.Item
-                name="eyeToBeOperated"
+                name="eyeToBeOperated2"
                 label="Eye to be operated"
                 className="emr-label"
               >
@@ -285,7 +321,7 @@ const PreOperativeCheckList: React.FC = () => {
         
             <Col span={12}>
               <Form.Item
-                name="pulse"
+                name="pulse2"
                 label="Pulse"
                 className="emr-label"
               >
@@ -303,7 +339,7 @@ const PreOperativeCheckList: React.FC = () => {
             </Col>
             <Col span={12}>
               <Form.Item
-                name="bp"
+                name="bp2"
                 label="B.P"
                 className="emr-label"
               >
@@ -321,7 +357,7 @@ const PreOperativeCheckList: React.FC = () => {
             </Col>
             <Col span={12}>
               <Form.Item
-                name="respiratoryRate"
+                name="respiratoryRate2"
                 label="Respiratory Rate"
                 className="emr-label"
               >
@@ -380,7 +416,7 @@ const PreOperativeCheckList: React.FC = () => {
       <div className="text-end">
         <Form.Item>
           <Button className="c-btn me-4 my-4">Cancel</Button>
-          <Button className="s-btn me-3" onClick={() => form.submit()}>
+          <Button className="s-btn me-3" onClick={handleSave}>
             Save
           </Button>
         </Form.Item>

@@ -104,7 +104,7 @@ const PatientDetail = () => {
                             <FaEye />
                           </Button>
                         </Link>
-                        <Link to={`discharge-note?id=${row?.patientId}`}>
+                        <Link to={`discharge-note?id=${row?.patientId}`} onClick={()=>handleId(row?.patientId)}>
                           <Button className="s-btn" style={{ height: "33px" }}>
                             Start Discharge
                           </Button>

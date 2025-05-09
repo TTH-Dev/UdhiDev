@@ -8,8 +8,11 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { Button, Col, Form, Input, Radio, Row, Upload } from "antd";
-import React from "react";
+import { Button, Col, Form, Input, message, Radio, Row, Upload } from "antd";
+import React, { useEffect, useState } from "react";
+import { api_url } from "../../../../Config";
+import axios from "axios";
+import moment from "moment";
 
 const AnestheticAssessment: React.FC = () => {
   const [form] = Form.useForm();
@@ -21,6 +24,106 @@ const AnestheticAssessment: React.FC = () => {
     if (Array.isArray(e)) return e;
     return e?.fileList;
   };
+
+  const [postData,setPostData]=useState({
+    temp:"",
+    pluse:"",
+    respiration	:"",
+    bp:"",
+
+  })
+
+  const patientId = sessionStorage.getItem("patientId");
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        localStorage.clear();
+        message.error("Login Required!");
+        return;
+      }
+
+      const formData = new FormData();
+      let gg=form.getFieldsValue()
+      formData.append("patientId", patientId || "-");
+      formData.append("anestheticsAssessmentData", JSON.stringify({...postData,...gg}));
+      await axios.post(`${api_url}/api/anestheticsAssessment`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      message.success("Saved Successfully!");
+    } catch (error: any) {
+      console.log(error);
+      message.error("Something went wrong!");
+    }
+  };
+
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [isUpdateId, setIsUpdateId] = useState("");
+  const getData = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        localStorage.clear();
+        message.error("Login Required!");
+        return;
+      }
+      const res = await axios.get(
+        `${api_url}/api/anestheticsAssessment?patientId=${patientId}&date=${moment().format(
+          "YYYY-MM-DD"
+        )}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      let df = res.data.data.assessments[1]      ;
+      if (df) {
+    
+        form.setFieldsValue(df?.anestheticsAssessmentData);
+        setPostData(df?.anestheticsAssessmentData);
+        setIsUpdate(true);
+        setIsUpdateId(df?._id);
+      }
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        localStorage.clear();
+        message.error("Login Required!");
+        return;
+      }
+
+      const formData = new FormData();
+      let gg=form.getFieldsValue()
+      formData.append("patientId", patientId || "-");
+      formData.append("anestheticsAssessmentData", JSON.stringify({...postData,...gg}));
+      await axios.patch(`${api_url}/api/anestheticsAssessment/${isUpdateId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      message.success("Updated Successfully!");
+    } catch (error: any) {
+      console.log(error);
+      message.error("Something went wrong!");
+    }
+  };
+
+useEffect(()=>{
+if(patientId){
+  getData()
+}
+},[patientId])
 
   return (
     <>
@@ -51,28 +154,28 @@ const AnestheticAssessment: React.FC = () => {
                 <TableCell>1</TableCell>
                 <TableCell>Temp</TableCell>
                 <TableCell>
-                  <Input />
+                  <Input value={postData?.temp} onChange={(e)=>setPostData({...postData,temp:e.target.value})}/>
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>2</TableCell>
                 <TableCell>Pulse</TableCell>
                 <TableCell>
-                  <Input />
+                  <Input  value={postData?.pluse} onChange={(e)=>setPostData({...postData,pluse:e.target.value})}/>
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>3</TableCell>
                 <TableCell>Respiration</TableCell>
                 <TableCell>
-                  <Input />
+                  <Input  value={postData?.respiration} onChange={(e)=>setPostData({...postData,respiration:e.target.value})}/>
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>4</TableCell>
                 <TableCell>B.P</TableCell>
                 <TableCell>
-                  <Input />
+                  <Input  value={postData?.bp} onChange={(e)=>setPostData({...postData,bp:e.target.value})}/>
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -149,8 +252,8 @@ const AnestheticAssessment: React.FC = () => {
       <div className="text-end">
         <Form.Item>
           <Button className="c-btn me-4 my-4">Cancel</Button>
-          <Button className="s-btn me-3" onClick={() => form.submit()}>
-            Save
+          <Button className="s-btn me-3" onClick={isUpdate?handleUpdate:handleSave}>
+            {isUpdate?"Update":"Save"}
           </Button>
         </Form.Item>
       </div>

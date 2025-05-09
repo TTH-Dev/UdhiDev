@@ -4,18 +4,164 @@ import {
   DatePicker,
   Form,
   Input,
+  message,
   Radio,
   Row,
   TimePicker,
 } from "antd";
-import React from "react";
+import dayjs from "dayjs";
+import React, { useEffect, useState } from "react";
+import { api_url } from "../../../../Config";
+import axios from "axios";
+import moment from "moment";
 
 const AdmissionForm: React.FC = () => {
   const [form] = Form.useForm();
 
+  const [postData, setPostData] = useState({
+    admissionDate: "",
+    admissionTime: "",
+    admissionReason: "",
+    dischargeDate: "",
+    dischargeTime: "",
+    consultationName: "",
+    phoneNum: "",
+    shiftedtoWard: "",
+    mobileNo: "",
+    eyeCondition: "",
+    typeOfAdmission: "",
+  });
+
   const onFinish = (values: any) => {
-    console.log("Form values:", values);
+    // Format date and time to string
+    const formattedData = {
+      ...values,
+      admissionDate: values.admissionDate
+        ? dayjs(values.admissionDate).format("YYYY-MM-DD")
+        : "",
+      admissionTime: values.admissionTime
+        ? dayjs(values.admissionTime).format("HH:mm")
+        : "",
+      dischargeDate: values.dischargeDate
+        ? dayjs(values.dischargeDate).format("YYYY-MM-DD")
+        : "",
+      dischargeTime: values.dischargeTime
+        ? dayjs(values.dischargeTime).format("HH:mm")
+        : "",
+    };
+
+    // Update the postData state
+    setPostData(formattedData);
   };
+  const patientId = sessionStorage.getItem("patientId");
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        localStorage.clear();
+        message.error("Login Required!");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("patientId", patientId || "-");
+      formData.append("admissionFormData", JSON.stringify(postData));
+      await axios.post(`${api_url}/api/admissionForm`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      message.success("Saved Successfully!");
+    } catch (error: any) {
+      console.log(error);
+      message.error("Something went wrong!");
+    }
+  };
+
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [isUpdateId, setIsUpdateId] = useState("");
+  const getData = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        localStorage.clear();
+        message.error("Login Required!");
+        return;
+      }
+      const res = await axios.get(
+        `${api_url}/api/admissionForm?patientId=${patientId}&date=${moment().format(
+          "YYYY-MM-DD"
+        )}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      let df = res.data.data.admissionForms[0];
+
+      if (df) {
+        const formattedData = {
+          ...df.admissionFormData,
+          admissionDate: df.admissionFormData.admissionDate
+            ? dayjs(df.admissionFormData.admissionDate)
+            : null,
+          admissionTime: df.admissionFormData.admissionTime
+            ? dayjs(df.admissionFormData.admissionTime, "hh:mm")
+            : null,
+          dischargeDate: df.admissionFormData.dischargeDate
+            ? dayjs(df.admissionFormData.dischargeDate)
+            : null,
+          dischargeTime: df.admissionFormData.dischargeTime
+            ? dayjs(df.admissionFormData.dischargeTime, "hh:mm")
+            : null,
+        };
+        form.setFieldsValue(formattedData);
+        setPostData(df?.admissionFormData);
+        setIsUpdate(true);
+        setIsUpdateId(df?._id);
+      }
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        localStorage.clear();
+        message.error("Login Required!");
+        return;
+      }
+
+      let gg = form.getFieldsValue();
+      const formData = new FormData();
+      formData.append("patientId", patientId || "-");
+      formData.append("admissionFormData", JSON.stringify(gg));
+      await axios.patch(
+        `${api_url}/api/admissionForm/${isUpdateId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      message.success("Updated Successfully!");
+    } catch (error: any) {
+      console.log(error);
+      message.error("Something went wrong!");
+    }
+  };
+
+  useEffect(() => {
+    if (patientId) {
+      getData();
+    }
+  }, [patientId]);
 
   return (
     <>
@@ -97,7 +243,7 @@ const AdmissionForm: React.FC = () => {
             </Col>
             <Col span={12}>
               <Form.Item
-                name="shifted"
+                name="shiftedtoWard"
                 label="Shifted To OT/ Ward At"
                 className="emr-label"
               >
@@ -126,7 +272,7 @@ const AdmissionForm: React.FC = () => {
 
             <Col span={24}>
               <Form.Item
-                name="admissionType"
+                name="typeOfAdmission"
                 label="Type of Admission"
                 className="emr-label"
               >
@@ -142,8 +288,11 @@ const AdmissionForm: React.FC = () => {
       <div className="text-end">
         <Form.Item>
           <Button className="c-btn me-4 my-4">Cancel</Button>
-          <Button className="s-btn me-3" onClick={() => form.submit()}>
-            Save
+          <Button
+            className="s-btn me-3"
+            onClick={isUpdate ? handleUpdate : handleSave}
+          >
+            {isUpdate ? "Update" : "Save"}
           </Button>
         </Form.Item>
       </div>

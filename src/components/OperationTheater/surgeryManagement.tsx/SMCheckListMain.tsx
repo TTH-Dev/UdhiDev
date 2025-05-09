@@ -48,15 +48,15 @@ const SMCheckListMain: React.FC = () => {
                 `emr-link ms-3 ${isActive ? "active" : ""}`
               }
             >
-             Surgery Notes
+              Surgery Notes
             </NavLink>
             <NavLink
               to="/operation-theater/surgery-management/surgery-management-setup/check-list/surgical-safety-check-list"
               className={({ isActive }) =>
-                `emr-link ms-3 ${isActive ? "active" : ""}`
+                `emr-link ms-0 ${isActive ? "active" : ""}`
               }
             >
-             Surgical Safety Check List
+              Surgical Safety Check List
             </NavLink>
             <NavLink
               to="/operation-theater/surgery-management/surgery-management-setup/check-list/anesthetist-notes"
@@ -64,7 +64,7 @@ const SMCheckListMain: React.FC = () => {
                 `emr-link ms-3 ${isActive ? "active" : ""}`
               }
             >
-           Anesthetist Notes 
+              Anesthetist Notes
             </NavLink>
             <NavLink
               to="/operation-theater/surgery-management/surgery-management-setup/check-list/discharge-consent"
@@ -72,7 +72,7 @@ const SMCheckListMain: React.FC = () => {
                 `emr-link ms-3 ${isActive ? "active" : ""}`
               }
             >
-           Discharge Consent
+              Discharge Consent
             </NavLink>
             <NavLink
               to="/operation-theater/surgery-management/surgery-management-setup/check-list/discharge-summary"
@@ -80,7 +80,7 @@ const SMCheckListMain: React.FC = () => {
                 `emr-link ms-3 ${isActive ? "active" : ""}`
               }
             >
-           Discharge Summary
+              Discharge Summary
             </NavLink>
           </div>
         </div>

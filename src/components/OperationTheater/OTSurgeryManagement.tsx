@@ -49,7 +49,6 @@ const OTSurgeryManagement = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log(res,"res");
       
 
       setTotalPages(res.data.totalPages);
@@ -73,12 +72,12 @@ const OTSurgeryManagement = () => {
     fetchData();
   }, [currentPage]);
 
-  const handleNav = () => {
+  const handleNav = (id:any) => {
+    sessionStorage.setItem("patientId",id)
+
     navigate("surgery-management-setup");
   };
 
-  console.log(data,"data");
-  
 
   return (
     <div className="emr-complaints-box mx-3 rounded">
@@ -124,7 +123,7 @@ const OTSurgeryManagement = () => {
                   </span>
                 </TableCell>
                 <TableCell>
-                  <Button className="i-btn" onClick={() => handleNav()}>
+                  <Button className="i-btn" onClick={() => handleNav(row?.key)}>
                     <MdEdit />
                   </Button>
                 </TableCell>

@@ -1092,6 +1092,7 @@ const Routing: React.FC = () => {
                 </Route>
                   <Route path="operation-theater/product-indents/add-product" element={<PIAddproduct/>}/>
                   <Route path="operation-theater/product-indents/add-lens" element={<PIAddLens/>}/>
+
                 <Route
                   path="/operation-theater/surgery-management/surgery-management-setup"
                   element={<OTSurgeryManagementMain />}
@@ -1099,6 +1100,7 @@ const Routing: React.FC = () => {
                   <Route index element={<Navigate to="assign" replace />} />
                   <Route path="assign" element={<OTAssign />}/>
                   <Route path="check-list" element={<SMCheckListMain />}/>
+
                   <Route path="prescription" element={<OTPrescription />}/>
                   <Route path="ot-notes" element={<OTNotes />}/>
                   <Route path="operation-management" element={<OToperationManagementMain />}>
@@ -1138,7 +1140,7 @@ const Routing: React.FC = () => {
                   <Route path="plan-of-management" element={<OTPlanOfManagement />}/>
                   <Route path="counsellor-report" element={<CounsellorReport />}/>
 
-                  <Route path="check-list" element={<CheckListMain />}>
+                  <Route path="check-list" element={<SMCheckListMain />}>
                     <Route
                       index
                       element={<Navigate to="pre-anesthetic-fitness" replace />}
