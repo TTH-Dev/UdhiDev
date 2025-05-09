@@ -1,6 +1,8 @@
 import { UploadOutlined } from "@ant-design/icons";
-import { Button, Col, Form, Input, Radio, Row, TimePicker, Upload } from "antd";
+import { Button, Col, Form, Input, message, Radio, Row, TimePicker, Upload } from "antd";
 import TextArea from "antd/es/input/TextArea";
+import axios from "axios";
+import { api_url } from "../../../../../Config";
 
 const CatractSurgeryNotes = () => {
   const [form] = Form.useForm();
@@ -8,6 +10,36 @@ const CatractSurgeryNotes = () => {
   const onFinish = (values: any) => {
     console.log("Form values:", values);
   };
+
+
+  const patientId = sessionStorage.getItem("patientId");
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        localStorage.clear();
+        message.error("Login Required!");
+        return;
+      }
+
+      const formData = new FormData();
+      let gg=form.getFieldsValue()
+      formData.append("patientId", patientId || "-");
+      formData.append("surgeryNotesData", JSON.stringify(gg));
+      await axios.post(`${api_url}/api/surgeryNotes`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      message.success("Saved Successfully!");
+    } catch (error: any) {
+      console.log(error);
+      message.error("Something went wrong!");
+    }
+  };
+
+
   return (
     <div>
       <div className="emr-complaints-box mx-3 p-3 mt-5">
@@ -264,7 +296,7 @@ const CatractSurgeryNotes = () => {
       <div className="text-end">
         <Form.Item>
           <Button className="c-btn me-4 my-4">Cancel</Button>
-          <Button className="s-btn me-3" onClick={() => form.submit()}>
+          <Button className="s-btn me-3" onClick={handleSave}>
             Save
           </Button>
         </Form.Item>
